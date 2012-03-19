@@ -183,7 +183,7 @@ the environment variables that will be checked for the log levels.
 
 The log levels may be customized, but if not defined, these are used:
 
-=over
+=over 4
 
 =item trace
 
@@ -197,7 +197,7 @@ The log levels may be customized, but if not defined, these are used:
 
 =item fatal
 
-
+=back
 
 For example, if C<env_prefix> is set to C<FREWS_PACKAGE> the following environment
 variables will be used:
