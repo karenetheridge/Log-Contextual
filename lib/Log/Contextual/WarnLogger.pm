@@ -42,7 +42,7 @@ my @default_levels = qw( trace debug info warn error fatal );
 our $AUTOLOAD;
 sub AUTOLOAD
 {
-    my $self = shift;
+    my $self = $_[0];
     my $class = blessed $self;
 
     (my $name = our $AUTOLOAD) =~ s/.*:://;
@@ -57,8 +57,25 @@ sub AUTOLOAD
         if not grep { $name eq $_ || $name eq 'is_' . $_ } @{$self->{levels}};
 
     no strict 'refs';
-    *$AUTOLOAD = sub {
-        print "$name subroutine called\n"
+
+    my ($is, $level) = $name =~ m/^(is_)?(.+)$/;
+    my $is_name = "is_$level";
+
+    *{$level} = sub {
+      my $self = shift;
+
+      $self->_log( $level, @_ )
+        if $self->$is_name;
+    };
+
+    *{$is_name} = sub {
+      my $self = shift;
+      return 1 if $ENV{$self->{env_prefix} . '_' . uc $level};
+      my $upto = $ENV{$self->{env_prefix} . '_UPTO'};
+      return unless $upto;
+      $upto = lc $upto;
+
+      return $self->{_level_num}{$level} >= $self->{_level_num}{$upto};
     };
     goto &$AUTOLOAD;
 }

@@ -91,3 +91,31 @@ use Test::Deep;
     }
 }
 
+# these tests taken from t/warnlogger.t
+
+my $l = Log::Contextual::WarnLogger->new({
+    env_prefix => 'BAR',
+    levels => [qw(custom1 custom2)]
+});
+
+{
+   local $ENV{BAR_CUSTOM1} = 0;
+   local $ENV{BAR_CUSTOM2} = 1;
+   ok(!$l->is_custom1, 'is_custom1 is false on WarnLogger');
+   ok($l->is_custom2, 'is_custom2 is true on WarnLogger');
+}
+
+{
+   local $ENV{BAR_UPTO} = 'custom1';
+
+   ok($l->is_custom1, 'is_custom1 is true on WarnLogger');
+   ok($l->is_custom2, 'is_custom2 is true on WarnLogger');
+}
+
+{
+   local $ENV{BAR_UPTO} = 'custom2';
+
+   ok(!$l->is_custom1, 'is_custom1 is false on WarnLogger');
+   ok($l->is_custom2, 'is_custom2 is true on WarnLogger');
+}
+
