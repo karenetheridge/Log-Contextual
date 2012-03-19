@@ -138,16 +138,19 @@ Log::Contextual::WarnLogger - Simple logger for libraries using Log::Contextual
  use Log::Contextual::WarnLogger;
  use Log::Contextual qw( :log ),
    -default_logger => Log::Contextual::WarnLogger->new({
-      env_prefix => 'MY_PACKAGE'
+      env_prefix => 'MY_PACKAGE',
+      levels => [ qw(debug info notice warning error critical alert emergency) ],
    });
 
- # warns '[info] program started' if $ENV{MY_PACKAGE_TRACE} is set
+ # warns '[info] program started' if $ENV{MY_PACKAGE_INFO} is set
  log_info { 'program started' }; # no-op because info is not in levels
  sub foo {
    # warns '[debug] entered foo' if $ENV{MY_PACKAGE_DEBUG} is set
    log_debug { 'entered foo' };
    ...
  }
+
+
 
 =head1 DESCRIPTION
 
@@ -161,15 +164,42 @@ works.
 
 =head2 new
 
-Arguments: C<< Dict[ env_prefix => Str ] $conf >>
+Arguments: C<< Dict[ env_prefix => Str, [ levels => List ] ] $conf >>
 
  my $l = Log::Contextual::WarnLogger->new({
-   env_prefix
+   env_prefix => 'BAR'
+ });
+
+or:
+
+ my $l = Log::Contextual::WarnLogger->new({
+   env_prefix => 'BAR',
+   levels => [ 'level1', 'level2' ]
+
  });
 
 Creates a new logger object where C<env_prefix> defines what the prefix is for
-the environment variables that will be checked for the six log levels.  For
-example, if C<env_prefix> is set to C<FREWS_PACKAGE> the following environment
+the environment variables that will be checked for the log levels.
+
+The log levels may be customized, but if not defined, these are used:
+
+=over
+
+=item trace
+
+=item debug
+
+=item info
+
+=item warn
+
+=item error
+
+=item fatal
+
+
+
+For example, if C<env_prefix> is set to C<FREWS_PACKAGE> the following environment
 variables will be used:
 
  FREWS_PACKAGE_UPTO
@@ -184,6 +214,8 @@ variables will be used:
 Note that C<UPTO> is a convenience variable.  If you set
 C<< FOO_UPTO=TRACE >> it will enable all log levels.  Similarly, if you
 set it to C<FATAL> only fatal will be enabled.
+
+=back
 
 =head2 $level
 
@@ -222,6 +254,9 @@ All of the following six methods work the same.  The basic pattern is:
 
  $l->fatal( '1 is never equal to 0!' );
 
+If different levels are specified, appropriate functions named for your custom
+levels work as you expect.
+
 =head2 is_$level
 
 All of the following six functions just return true if their respective
@@ -250,6 +285,9 @@ environment variable is enabled.
 =head3 is_fatal
 
  say q{fatal'ing} if $l->is_fatal;
+
+If different levels are specified, appropriate is_$level functions work as you
+would expect.
 
 =head1 AUTHOR
 
