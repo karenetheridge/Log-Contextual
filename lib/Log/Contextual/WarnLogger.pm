@@ -74,14 +74,21 @@ sub AUTOLOAD
       # don't log if the variable specifically says not to
       return 0 if defined $ENV{$prefix_field} and not $ENV{$prefix_field};
 
-      # always log, if no custom levels were supplied
+      my $upto_field = $self->{env_prefix} . '_UPTO';
+      my $upto = $ENV{$upto_field};
+
+      if ($upto)
+      {
+          $upto = lc $upto;
+
+          croak "Unrecognized log level 'foo' in \$ENV{$upto_field}"
+            if not defined $self->{_level_num}{$upto};
+
+          return $self->{_level_num}{$level} >= $self->{_level_num}{$upto};
+      }
+
+      # if we don't recognize this level and nothing says otherwise, log!
       return 1 if not $self->{_custom_levels};
-
-      my $upto = $ENV{$self->{env_prefix} . '_UPTO'};
-      return unless $upto;
-      $upto = lc $upto;
-
-      return $self->{_level_num}{$level} >= $self->{_level_num}{$upto};
     };
     goto &$AUTOLOAD;
 }

@@ -114,6 +114,13 @@ use Test::Deep;
         ok($l->is_custom2, 'is_custom2 is true on WarnLogger');
 
         ok($l->is_foo, 'is_foo defaults to true on WarnLogger');
+
+        local $ENV{BAR_UPTO} = 'foo';
+        like(
+            exception { $l->is_bar },
+            qr/\QUnrecognized log level 'foo'\E in \$ENV{BAR_UPTO}\E/,
+            'Cannot use an unrecognized log level in UPTO',
+        );
     }
 }
 
@@ -145,5 +152,15 @@ my $l = Log::Contextual::WarnLogger->new({
 
     ok(!$l->is_custom1, 'is_custom1 is false on WarnLogger');
     ok($l->is_custom2, 'is_custom2 is true on WarnLogger');
+}
+
+{
+    local $ENV{BAR_UPTO} = 'foo';
+
+    like(
+        exception { $l->is_custom1 },
+        qr/Unrecognized log level 'foo'/,
+        'Cannot use an unrecognized log level in UPTO',
+    );
 }
 
