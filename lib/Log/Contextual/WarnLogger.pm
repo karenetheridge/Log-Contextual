@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Carp 'croak';
+use Scalar::Util 'blessed';
 
 my @default_levels = qw( trace debug info warn error fatal );
 
@@ -33,6 +34,33 @@ my @default_levels = qw( trace debug info warn error fatal );
       return $self->{_level_num}{$name} >= $self->{_level_num}{$upto};
     };
   }
+}
+
+# TODO: consider dynamically generating a class and return that on new,
+# rather than using AUTOLOAD to handle levels.
+
+our $AUTOLOAD;
+sub AUTOLOAD
+{
+    my $self = shift;
+    my $class = blessed $self;
+
+    (my $name = our $AUTOLOAD) =~ s/.*:://;
+    return if $name eq 'DESTROY';
+
+    # $self must be blessed for customized methods
+    #confess "Undefined subroutine \&$AUTOLOAD " if not $class;
+    croak "Can't locate object method \"$name\" via package \"" . ($self || __PACKAGE__) . '"'
+        if not $class;
+
+    croak "Can't locate object method \"$name\" via package \"" . $class . '"'
+        if not grep { $name eq $_ || $name eq 'is_' . $_ } @{$self->{levels}};
+
+    no strict 'refs';
+    *$AUTOLOAD = sub {
+        print "$name subroutine called\n"
+    };
+    goto &$AUTOLOAD;
 }
 
 sub new {

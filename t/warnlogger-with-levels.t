@@ -46,3 +46,48 @@ use Test::Deep;
     );
 }
 
+
+{
+    my $l = Log::Contextual::WarnLogger->new({
+        env_prefix => 'BAR',
+        levels => [qw(custom1 custom2)]
+    });
+
+    cmp_deeply(
+        $l,
+        noclass({
+            levels => [ qw(custom1 custom2) ],
+            _level_num => {
+                custom1 => 0,
+                custom2 => 1,
+            },
+            env_prefix => 'BAR',
+        }),
+        'object is constructed with custom levels',
+    );
+
+    like(
+        exception { Log::Contextual::WarnLogger->custom1 },
+        qr/Can't locate object method "custom1" via package "Log::Contextual::WarnLogger"/,
+        'methods do not work without a blessed object instance',
+    );
+
+    foreach my $sub (qw(is_custom1 is_custom2 custom1 custom2))
+    {
+        is(
+            exception { $l->$sub },
+            undef,
+            $sub . ' is handled by AUTOLOAD',
+        );
+    }
+
+    foreach my $sub (qw(is_foo foo))
+    {
+        like(
+            exception { $l->$sub },
+            qr/Can't locate object method "$sub" via package "Log::Contextual::WarnLogger"/,
+            'arbitrary subs are still rejected',
+        );
+    }
+}
+
