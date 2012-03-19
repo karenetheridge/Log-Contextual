@@ -12,26 +12,26 @@ my @default_levels = qw( trace debug info warn error fatal );
 # generate subs to handle the default levels
 # anything else will have to be handled by AUTOLOAD at runtime
 {
-  for my $name (@default_levels) {
+  for my $level (@default_levels) {
 
     no strict 'refs';
 
-    my $is_name = "is_$name";
-    *{$name} = sub {
+    my $is_name = "is_$level";
+    *{$level} = sub {
       my $self = shift;
 
-      $self->_log( $name, @_ )
+      $self->_log( $level, @_ )
         if $self->$is_name;
     };
 
     *{$is_name} = sub {
       my $self = shift;
-      return 1 if $ENV{$self->{env_prefix} . '_' . uc $name};
+      return 1 if $ENV{$self->{env_prefix} . '_' . uc $level};
       my $upto = $ENV{$self->{env_prefix} . '_UPTO'};
       return unless $upto;
       $upto = lc $upto;
 
-      return $self->{_level_num}{$name} >= $self->{_level_num}{$upto};
+      return $self->{_level_num}{$level} >= $self->{_level_num}{$upto};
     };
   }
 }
