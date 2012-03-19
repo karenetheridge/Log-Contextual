@@ -53,14 +53,11 @@ sub AUTOLOAD
     croak "Can't locate object method \"$name\" via package \"" . ($self || __PACKAGE__) . '"'
         if not $class;
 
-    croak "Can't locate object method \"$name\" via package \"" . $class . '"'
-        if not grep { $name eq $_ || $name eq 'is_' . $_ } @{$self->{levels}};
-
-    no strict 'refs';
-
+    # extract the log level from the sub name
     my ($is, $level) = $name =~ m/^(is_)?(.+)$/;
     my $is_name = "is_$level";
 
+    no strict 'refs';
     *{$level} = sub {
       my $self = shift;
 
@@ -70,7 +67,16 @@ sub AUTOLOAD
 
     *{$is_name} = sub {
       my $self = shift;
-      return 1 if $ENV{$self->{env_prefix} . '_' . uc $level};
+
+      my $prefix_field = $self->{env_prefix} . '_' . uc $level;
+      return 1 if $ENV{$prefix_field};
+
+      # don't log if the variable specifically says not to
+      return 0 if defined $ENV{$prefix_field} and not $ENV{$prefix_field};
+
+      # always log, if no custom levels were supplied
+      return 1 if not $self->{_custom_levels};
+
       my $upto = $ENV{$self->{env_prefix} . '_UPTO'};
       return unless $upto;
       $upto = lc $upto;
@@ -86,6 +92,8 @@ sub new {
   my $levels = $args->{levels};
   croak 'invalid levels specification: must be non-empty arrayref'
     if defined $levels and (ref $levels ne 'ARRAY' or !@$levels);
+
+  my $custom_levels = defined $levels;
   $levels ||= [ @default_levels ];
 
   my %level_num; @level_num{ @$levels } = (0 .. $#{$levels});
@@ -93,6 +101,7 @@ sub new {
   my $self = bless {
       levels => $levels,
       _level_num => \%level_num,
+      _custom_levels => $custom_levels,
   }, $class;
 
   $self->{env_prefix} = $args->{env_prefix} or

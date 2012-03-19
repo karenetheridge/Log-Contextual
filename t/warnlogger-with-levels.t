@@ -40,6 +40,7 @@ use Test::Deep;
                 error   => 4,
                 fatal   => 5,
             },
+            _custom_levels => '',
             env_prefix => 'FOO',
         }),
         'object is constructed with default levels',
@@ -61,6 +62,7 @@ use Test::Deep;
                 custom1 => 0,
                 custom2 => 1,
             },
+            _custom_levels => 1,
             env_prefix => 'BAR',
         }),
         'object is constructed with custom levels',
@@ -83,11 +85,35 @@ use Test::Deep;
 
     foreach my $sub (qw(is_foo foo))
     {
-        like(
+        is(
             exception { $l->$sub },
-            qr/Can't locate object method "$sub" via package "Log::Contextual::WarnLogger"/,
-            'arbitrary subs are still rejected',
+            undef,
+            'arbitrary sub ' . $sub . ' is handled by AUTOLOAD',
         );
+    }
+}
+
+{
+    # levels is optional - most things should still work otherwise.
+    my $l = Log::Contextual::WarnLogger->new({
+        env_prefix => 'BAR',
+    });
+
+    # if we don't know the level, and there are no environment variables set,
+    # just log everything.
+    {
+        ok($l->is_custom1, 'is_custom1 defaults to true on WarnLogger');
+        ok($l->is_custom2, 'is_custom2 defaults to true on WarnLogger');
+    }
+
+    # otherwise, go with what the variable says.
+    {
+        local $ENV{BAR_CUSTOM1} = 0;
+        local $ENV{BAR_CUSTOM2} = 1;
+        ok(!$l->is_custom1, 'is_custom1 is false on WarnLogger');
+        ok($l->is_custom2, 'is_custom2 is true on WarnLogger');
+
+        ok($l->is_foo, 'is_foo defaults to true on WarnLogger');
     }
 }
 
@@ -99,17 +125,19 @@ my $l = Log::Contextual::WarnLogger->new({
 });
 
 {
-   local $ENV{BAR_CUSTOM1} = 0;
-   local $ENV{BAR_CUSTOM2} = 1;
-   ok(!$l->is_custom1, 'is_custom1 is false on WarnLogger');
-   ok($l->is_custom2, 'is_custom2 is true on WarnLogger');
+    local $ENV{BAR_CUSTOM1} = 0;
+    local $ENV{BAR_CUSTOM2} = 1;
+    ok(!$l->is_custom1, 'is_custom1 is false on WarnLogger');
+    ok($l->is_custom2, 'is_custom2 is true on WarnLogger');
+
+    ok(!$l->is_foo, 'is_foo is false (custom levels supplied) on WarnLogger');
 }
 
 {
-   local $ENV{BAR_UPTO} = 'custom1';
+    local $ENV{BAR_UPTO} = 'custom1';
 
-   ok($l->is_custom1, 'is_custom1 is true on WarnLogger');
-   ok($l->is_custom2, 'is_custom2 is true on WarnLogger');
+    ok($l->is_custom1, 'is_custom1 is true on WarnLogger');
+    ok($l->is_custom2, 'is_custom2 is true on WarnLogger');
 }
 
 {
