@@ -5,16 +5,16 @@ use warnings;
 
 our $VERSION = '0.004001';
 
-my @levels = qw(debug trace warn info error fatal);
+my @default_levels = qw( trace debug info warn error fatal );
 
 use Exporter::Declare;
 use Exporter::Declare::Export::Generator;
 use Data::Dumper::Concise;
 use Scalar::Util 'blessed';
 
-my @dlog = ((map "Dlog_$_", @levels), (map "DlogS_$_", @levels));
+my @dlog = ((map "Dlog_$_", @default_levels), (map "DlogS_$_", @default_levels));
 
-my @log = ((map "log_$_", @levels), (map "logS_$_", @levels));
+my @log = ((map "log_$_", @default_levels), (map "logS_$_", @default_levels));
 
 eval {
    require Log::Log4perl;
@@ -41,8 +41,8 @@ sub before_import {
    die 'Log::Contextual does not have a default import list'
       if $spec->config->{default};
 
-   my @levels = @{$class->arg_levels($spec->config->{levels})};
-   for my $level (@levels) {
+   my @default_levels = @{$class->arg_levels($spec->config->{levels})};
+   for my $level (@default_levels) {
       if ($spec->config->{log}) {
          $spec->add_export("&log_$level", sub (&@) {
             _do_log( $level => _get_logger( caller ), shift @_, @_)
@@ -71,7 +71,7 @@ sub before_import {
 }
 
 sub arg_logger { $_[1] }
-sub arg_levels { $_[1] || [qw(debug trace warn info error fatal)] }
+sub arg_levels { $_[1] || [@default_levels] }
 sub arg_package_logger { $_[1] }
 sub arg_default_logger { $_[1] }
 
