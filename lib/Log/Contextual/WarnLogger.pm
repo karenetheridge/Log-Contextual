@@ -3,10 +3,15 @@ package Log::Contextual::WarnLogger;
 use strict;
 use warnings;
 
+use Carp 'croak';
+
+my @default_levels = qw( trace debug info warn error fatal );
+
+
+# generate subs to handle the default levels
+# anything else will have to be handled by AUTOLOAD at runtime
 {
-  my @levels = (qw( trace debug info warn error fatal ));
-  my %level_num; @level_num{ @levels } = (0 .. $#levels);
-  for my $name (@levels) {
+  for my $name (@default_levels) {
 
     no strict 'refs';
 
@@ -25,14 +30,25 @@ use warnings;
       return unless $upto;
       $upto = lc $upto;
 
-      return $level_num{$name} >= $level_num{$upto};
+      return $self->{_level_num}{$name} >= $self->{_level_num}{$upto};
     };
   }
 }
 
 sub new {
   my ($class, $args) = @_;
-  my $self = bless {}, $class;
+
+  my $levels = $args->{levels};
+  croak 'invalid levels specification: must be non-empty arrayref'
+    if defined $levels and (ref $levels ne 'ARRAY' or !@$levels);
+  $levels ||= [ @default_levels ];
+
+  my %level_num; @level_num{ @$levels } = (0 .. $#{$levels});
+
+  my $self = bless {
+      levels => $levels,
+      _level_num => \%level_num,
+  }, $class;
 
   $self->{env_prefix} = $args->{env_prefix} or
      die 'no env_prefix passed to Log::Contextual::WarnLogger->new';
