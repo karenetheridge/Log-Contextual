@@ -141,9 +141,9 @@ my $l = Log::Contextual::WarnLogger->new({
 }
 
 {
-   local $ENV{BAR_UPTO} = 'custom2';
+    local $ENV{BAR_UPTO} = 'custom2';
 
-   ok(!$l->is_custom1, 'is_custom1 is false on WarnLogger');
-   ok($l->is_custom2, 'is_custom2 is true on WarnLogger');
+    ok(!$l->is_custom1, 'is_custom1 is false on WarnLogger');
+    ok($l->is_custom2, 'is_custom2 is true on WarnLogger');
 }
 
