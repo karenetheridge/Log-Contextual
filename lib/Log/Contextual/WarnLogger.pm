@@ -36,9 +36,6 @@ my @default_levels = qw( trace debug info warn error fatal );
   }
 }
 
-# TODO: consider dynamically generating a class and return that on new,
-# rather than using AUTOLOAD to handle levels.
-
 our $AUTOLOAD;
 sub AUTOLOAD
 {
