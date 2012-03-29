@@ -36,51 +36,49 @@ my @default_levels = qw( trace debug info warn error fatal );
 }
 
 our $AUTOLOAD;
-sub AUTOLOAD
-{
-    my $self = $_[0];
+sub AUTOLOAD {
+  my $self = $_[0];
 
-    (my $name = our $AUTOLOAD) =~ s/.*:://;
-    return if $name eq 'DESTROY';
+  (my $name = our $AUTOLOAD) =~ s/.*:://;
+  return if $name eq 'DESTROY';
 
-    # extract the log level from the sub name
-    my ($is, $level) = $name =~ m/^(is_)?(.+)$/;
-    my $is_name = "is_$level";
+  # extract the log level from the sub name
+  my ($is, $level) = $name =~ m/^(is_)?(.+)$/;
+  my $is_name = "is_$level";
 
-    no strict 'refs';
-    *{$level} = sub {
-      my $self = shift;
+  no strict 'refs';
+  *{$level} = sub {
+    my $self = shift;
 
-      $self->_log( $level, @_ )
-        if $self->$is_name;
-    };
+    $self->_log( $level, @_ )
+      if $self->$is_name;
+  };
 
-    *{$is_name} = sub {
-      my $self = shift;
+  *{$is_name} = sub {
+    my $self = shift;
 
-      my $prefix_field = $self->{env_prefix} . '_' . uc $level;
-      return 1 if $ENV{$prefix_field};
+    my $prefix_field = $self->{env_prefix} . '_' . uc $level;
+    return 1 if $ENV{$prefix_field};
 
-      # don't log if the variable specifically says not to
-      return 0 if defined $ENV{$prefix_field} and not $ENV{$prefix_field};
+    # don't log if the variable specifically says not to
+    return 0 if defined $ENV{$prefix_field} and not $ENV{$prefix_field};
 
-      my $upto_field = $self->{env_prefix} . '_UPTO';
-      my $upto = $ENV{$upto_field};
+    my $upto_field = $self->{env_prefix} . '_UPTO';
+    my $upto = $ENV{$upto_field};
 
-      if ($upto)
-      {
-          $upto = lc $upto;
+    if ($upto) {
+      $upto = lc $upto;
 
-          croak "Unrecognized log level '$upto' in \$ENV{$upto_field}"
-            if not defined $self->{level_num}{$upto};
+      croak "Unrecognized log level '$upto' in \$ENV{$upto_field}"
+        if not defined $self->{level_num}{$upto};
 
-          return $self->{level_num}{$level} >= $self->{level_num}{$upto};
-      }
+      return $self->{level_num}{$level} >= $self->{level_num}{$upto};
+    }
 
-      # if we don't recognize this level and nothing says otherwise, log!
-      return 1 if not $self->{custom_levels};
-    };
-    goto &$AUTOLOAD;
+    # if we don't recognize this level and nothing says otherwise, log!
+    return 1 if not $self->{custom_levels};
+  };
+  goto &$AUTOLOAD;
 }
 
 sub new {
@@ -96,9 +94,9 @@ sub new {
   my %level_num; @level_num{ @$levels } = (0 .. $#{$levels});
 
   my $self = bless {
-      levels => $levels,
-      level_num => \%level_num,
-      custom_levels => $custom_levels,
+    levels => $levels,
+    level_num => \%level_num,
+    custom_levels => $custom_levels,
   }, $class;
 
   $self->{env_prefix} = $args->{env_prefix} or
