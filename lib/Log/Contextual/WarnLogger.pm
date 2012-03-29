@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use Carp 'croak';
-use Scalar::Util 'blessed';
 
 my @default_levels = qw( trace debug info warn error fatal );
 
@@ -40,7 +39,6 @@ our $AUTOLOAD;
 sub AUTOLOAD
 {
     my $self = $_[0];
-    my $class = blessed $self;
 
     (my $name = our $AUTOLOAD) =~ s/.*:://;
     return if $name eq 'DESTROY';
