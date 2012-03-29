@@ -68,12 +68,6 @@ use Test::Deep;
         'object is constructed with custom levels',
     );
 
-    like(
-        exception { Log::Contextual::WarnLogger->custom1 },
-        qr/Can't locate object method "custom1" via package "Log::Contextual::WarnLogger"/,
-        'methods do not work without a blessed object instance',
-    );
-
     foreach my $sub (qw(is_custom1 is_custom2 custom1 custom2))
     {
         is(

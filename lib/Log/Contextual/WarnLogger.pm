@@ -45,11 +45,6 @@ sub AUTOLOAD
     (my $name = our $AUTOLOAD) =~ s/.*:://;
     return if $name eq 'DESTROY';
 
-    # $self must be blessed for customized methods
-    #confess "Undefined subroutine \&$AUTOLOAD " if not $class;
-    croak "Can't locate object method \"$name\" via package \"" . ($self || __PACKAGE__) . '"'
-        if not $class;
-
     # extract the log level from the sub name
     my ($is, $level) = $name =~ m/^(is_)?(.+)$/;
     my $is_name = "is_$level";
