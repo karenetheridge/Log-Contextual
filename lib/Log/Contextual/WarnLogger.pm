@@ -130,7 +130,7 @@ Log::Contextual::WarnLogger - Simple logger for libraries using Log::Contextual
       levels => [ qw(debug info notice warning error critical alert emergency) ],
    });
 
- # warns '[info] program started' if $ENV{MY_PACKAGE_INFO} is set
+ # warns '[info] program started' if $ENV{MY_PACKAGE_TRACE} is set
  log_info { 'program started' }; # no-op because info is not in levels
  sub foo {
    # warns '[debug] entered foo' if $ENV{MY_PACKAGE_DEBUG} is set
