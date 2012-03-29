@@ -31,7 +31,7 @@ my @default_levels = qw( trace debug info warn error fatal );
       return unless $upto;
       $upto = lc $upto;
 
-      return $self->{_level_num}{$level} >= $self->{_level_num}{$upto};
+      return $self->{level_num}{$level} >= $self->{level_num}{$upto};
     };
   }
 }
@@ -74,13 +74,13 @@ sub AUTOLOAD
           $upto = lc $upto;
 
           croak "Unrecognized log level 'foo' in \$ENV{$upto_field}"
-            if not defined $self->{_level_num}{$upto};
+            if not defined $self->{level_num}{$upto};
 
-          return $self->{_level_num}{$level} >= $self->{_level_num}{$upto};
+          return $self->{level_num}{$level} >= $self->{level_num}{$upto};
       }
 
       # if we don't recognize this level and nothing says otherwise, log!
-      return 1 if not $self->{_custom_levels};
+      return 1 if not $self->{custom_levels};
     };
     goto &$AUTOLOAD;
 }
@@ -99,8 +99,8 @@ sub new {
 
   my $self = bless {
       levels => $levels,
-      _level_num => \%level_num,
-      _custom_levels => $custom_levels,
+      level_num => \%level_num,
+      custom_levels => $custom_levels,
   }, $class;
 
   $self->{env_prefix} = $args->{env_prefix} or

@@ -32,7 +32,7 @@ use Test::Deep;
         $l,
         noclass({
             levels => [ qw(trace debug info warn error fatal) ],
-            _level_num => {
+            level_num => {
                 trace   => 0,
                 debug   => 1,
                 info    => 2,
@@ -40,7 +40,7 @@ use Test::Deep;
                 error   => 4,
                 fatal   => 5,
             },
-            _custom_levels => '',
+            custom_levels => '',
             env_prefix => 'FOO',
         }),
         'object is constructed with default levels',
@@ -58,11 +58,11 @@ use Test::Deep;
         $l,
         noclass({
             levels => [ qw(custom1 custom2) ],
-            _level_num => {
+            level_num => {
                 custom1 => 0,
                 custom2 => 1,
             },
-            _custom_levels => 1,
+            custom_levels => 1,
             env_prefix => 'BAR',
         }),
         'object is constructed with custom levels',
