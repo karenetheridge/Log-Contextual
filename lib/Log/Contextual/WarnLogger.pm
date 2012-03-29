@@ -156,7 +156,7 @@ works.
 
 =head2 new
 
-Arguments: C<< Dict[ env_prefix => Str, [ levels => List ] ] $conf >>
+Arguments: C<< Dict[ env_prefix => Str, levels => List ] $conf >>
 
  my $l = Log::Contextual::WarnLogger->new({
    env_prefix => 'BAR'
