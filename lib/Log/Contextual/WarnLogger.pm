@@ -71,7 +71,7 @@ sub AUTOLOAD
       {
           $upto = lc $upto;
 
-          croak "Unrecognized log level 'foo' in \$ENV{$upto_field}"
+          croak "Unrecognized log level '$upto' in \$ENV{$upto_field}"
             if not defined $self->{level_num}{$upto};
 
           return $self->{level_num}{$level} >= $self->{level_num}{$upto};
