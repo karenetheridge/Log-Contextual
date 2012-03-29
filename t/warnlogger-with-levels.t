@@ -7,7 +7,6 @@ use Log::Contextual qw{:log set_logger} => -logger =>
 
 use Test::More qw(no_plan);
 use Test::Fatal;
-use Test::Deep;
 
 {
     my $l;
@@ -28,23 +27,6 @@ use Test::Deep;
         undef,
         'ok to leave levels undefined',
     );
-    cmp_deeply(
-        $l,
-        noclass({
-            levels => [ qw(trace debug info warn error fatal) ],
-            level_num => {
-                trace   => 0,
-                debug   => 1,
-                info    => 2,
-                warn    => 3,
-                error   => 4,
-                fatal   => 5,
-            },
-            custom_levels => '',
-            env_prefix => 'FOO',
-        }),
-        'object is constructed with default levels',
-    );
 }
 
 
@@ -53,20 +35,6 @@ use Test::Deep;
         env_prefix => 'BAR',
         levels => [qw(custom1 custom2)]
     });
-
-    cmp_deeply(
-        $l,
-        noclass({
-            levels => [ qw(custom1 custom2) ],
-            level_num => {
-                custom1 => 0,
-                custom2 => 1,
-            },
-            custom_levels => 1,
-            env_prefix => 'BAR',
-        }),
-        'object is constructed with custom levels',
-    );
 
     foreach my $sub (qw(is_custom1 is_custom2 custom1 custom2))
     {

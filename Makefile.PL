@@ -11,6 +11,5 @@ requires 'Carp';
 requires 'Scalar::Util';
 
 test_requires 'Test::Fatal';
-test_requires 'Test::Deep';
 
 WriteAll;
